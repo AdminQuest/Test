@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin'Quest - Préparateur intelligent aux oraux d'administrateur territorial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin-top: 20px;
+        }
+        
+        .controls {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .controls div {
+            margin-right: 20px;
+        }
+        
+        select, input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            width: 200px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .question-container {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s;
+        }
+        
+        .question-container:hover {
+            background-color: #e8f4f8;
+        }
+        
+        .question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metadata {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .attention-points {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .keywords {
+            margin-top: 5px;
+        }
+        
+        .keyword {
+            background-color: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #searchResults {
+            margin-top: 20px;
+        }
+        
+        #questionsCount {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-import {
+            background-color: #6c757d;
+        }
+        
+        .btn-reset {
+            background-color: #6c757d;
+        }
+        
+        .difficulty-1 {
+            border-left-color: #2ecc71; /* Vert */
+        }
+        
+        .difficulty-2 {
+            border-left-color: #3498db; /* Bleu */
+        }
+        
+        .difficulty-3 {
+            border-left-color: #f39c12; /* Orange */
+        }
+        
+        .difficulty-4 {
+            border-left-color: #e74c3c; /* Rouge */
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            border-top: 1px solid #ecf0f1;
+        }
+
+.auto-response {
+    background-color: #f1f8e9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    border-left: 4px solid #8bc34a;
+}
+
+.auto-response h4 {
+    color: #33691e;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.auto-response p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.auto-response p strong {
+    color: #2e7d32;
+    display: inline-block;
+    min-width: 160px;
+}
+
+.auto-response.rafale {
+    background-color: #e8f5e9;
+    border-left: 5px solid #43a047;
+    background-image: url('https://img.freepik.com/premium-vector/lightning-electric-spark-discharge-atmosphere-occurs-thunderstorm-bright-flash-light-is-accompanied-by-thunder-doodle-linear-cartoon_253359-2029.jpg?w=740');
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 450px;
+    background-blend-mode: lighten;
+    background-opacity: 0.15;
+}
+
+/* Réponse par les enjeux (Albatros) */
+.auto-response.enjeux {
+    background-color: #e3f2fd;
+    border-left: 5px solid #1976d2;
+    background-image: url('https://img.freepik.com/premium-vector/albatross-vector-art_1085708-26871.jpg?w=740');
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 450px;
+    background-blend-mode: lighten;
+    background-opacity: 0.15;
+}
+
+/* Réponse poisson japonais */
+.auto-response.poisson {
+    background-color: #fff8e1;
+    border-left: 5px solid #ffa000;
+    background-image: url('https://img.freepik.com/premium-vector/origami-lake-fish-icon-cartoon-vector-geometric-animal-paper-art_98402-74065.jpg?w=740');
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 450px;
+    background-blend-mode: lighten;
+    background-opacity: 0.15;
+}
+
+/* Réponse analyse réflexive */
+.auto-response.reflexive {
+    background-color: #f3e5f5;
+    border-left: 5px solid #8e24aa;
+    background-image: url('https://img.freepik.com/premium-vector/cartoon-brain-idea-creative-design-isolated_24877-14843.jpg?w=740');
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 450px;
+    background-blend-mode: lighten;
+    background-opacity: 0.15;
+}
+
+/* Réponse pièce de théâtre */
+.auto-response.theatre {
+    background-color: #ffebee;
+    border-left: 5px solid #e53935;
+    background-image: url('https://img.freepik.com/free-vector/realistic-golden-masks-composition_1284-26418.jpg?t=st=1745055125~exp=1745058725~hmac=7d1488165f8bb0a143508a51f407ba385f8371c00e34404476792a2390433e81&w=740');
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 450px;
+    background-blend-mode: lighten;
+    background-opacity: 0.15;
+}
+
+/* Styles améliorés pour les réponses automatiques */
+.auto-response {
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+    padding-left: 60px; /* Espace pour l'icône */
+}
+
+.auto-response h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.auto-response .response-icon {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    font-size: 28px;
+}
+
+.auto-response p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.auto-response p strong {
+    display: inline-block;
+    min-width: 160px;
+}
+
+/* Styles spécifiques pour chaque type de réponse */
+.auto-response.rafale {
+    background-color: #e8f5e9;
+    border-left: 5px solid #43a047;
+}
+.auto-response.rafale h4 {
+    color: #2e7d32;
+}
+.auto-response.rafale .response-icon {
+    color: #2e7d32;
+}
+
+.auto-response.enjeux {
+    background-color: #e3f2fd;
+    border-left: 5px solid #1976d2;
+}
+.auto-response.enjeux h4 {
+    color: #0d47a1;
+}
+.auto-response.enjeux .response-icon {
+    color: #0d47a1;
+}
+
+.auto-response.poisson {
+    background-color: #fff8e1;
+    border-left: 5px solid #ffa000;
+}
+.auto-response.poisson h4 {
+    color: #e65100;
+}
+.auto-response.poisson .response-icon {
+    color: #e65100;
+}
+
+.auto-response.reflexive {
+    background-color: #f3e5f5;
+    border-left: 5px solid #8e24aa;
+}
+.auto-response.reflexive h4 {
+    color: #4a148c;
+}
+.auto-response.reflexive .response-icon {
+    color: #4a148c;
+}
+
+.auto-response.theatre {
+    background-color: #ffebee;
+    border-left: 5px solid #e53935;
+}
+.auto-response.theatre h4 {
+    color: #b71c1c;
+}
+.auto-response.theatre .response-icon {
+    color: #b71c1c;
+}
+
+/* Style pour la légende des types de réponses */
+.response-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.legend-icon {
+    margin-right: 5px;
+    font-size: 1.2em;
+}
+
+/* Contrôles pour les réponses automatiques */
+.response-controls {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.response-controls label {
+    margin-right: 10px;
+}
+
+        .header-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+.logo {
+    height: 400px; /* Augmenter de 50px à 400px */
+    margin-right: 15px;
+}
+        
+        .main-title {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+.subtitle {
+    color: #3498db;
+    margin: 15px 0;
+    font-size: 1.5em;
+    font-weight: normal;
+}
+
+.author {
+    font-size: 1em;
+    color: #7f8c8d;
+    margin-top: 10px;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.header-container {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+    </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="header-container">
+    <div class="logo-container">
+        <img src="https://i.goopics.net/0opqy7.png" alt="Logo Admin'Quest" class="logo">
+    </div>
+    <h2 class="subtitle">Préparateur intelligent aux oraux d'administrateur territorial</h2>
+    <p class="author">par Fabrice RIBET, administrateur territorial</p>
+</div>
+<div class="response-legend">
+    <div class="legend-item">
+        <i class="fas fa-bolt legend-icon" style="color: #2e7d32;"></i>
+        <span>Rafale (réponse rapide et concise)</span>
+    </div>
+    <div class="legend-item">
+        <i class="fas fa-feather-alt legend-icon" style="color: #0d47a1;"></i>
+        <span>Albatros (réponse par les enjeux)</span>
+    </div>
+    <div class="legend-item">
+        <i class="fas fa-fish legend-icon" style="color: #e65100;"></i>
+        <span>Poisson japonais (contextualisation et analyse)</span>
+    </div>
+    <div class="legend-item">
+        <i class="fas fa-brain legend-icon" style="color: #4a148c;"></i>
+        <span>Analyse réflexive (exemples structurés)</span>
+    </div>
+    <div class="legend-item">
+        <i class="fas fa-theater-masks legend-icon" style="color: #b71c1c;"></i>
+        <span>Pièce de théâtre (mise en situation en 3 actes)</span>
+    </div>
+</div>
+<div class="response-controls">
+    <label for="showAutoResponses">Afficher les réponses automatiques:</label>
+    <input type="checkbox" id="showAutoResponses">
+</div>
+    
+    <div class="controls">
+        <div>
+            <label for="categoryFilter">Catégorie:</label>
+            <select id="categoryFilter">
+                <option value="all">Toutes les catégories</option>
+                <option value="1">1. Questions de personnalité</option>
+                <option value="2">2. Questions managériales</option>
+                <option value="3">3. Questions de culture territoriale</option>
+                <option value="4">4. Mises en situation</option>
+                <option value="5">5. Questions embarrassantes</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="subcategoryFilter">Sous-catégorie:</label>
+            <select id="subcategoryFilter">
+                <option value="all">Toutes les sous-catégories</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="difficultyFilter">Difficulté:</label>
+            <select id="difficultyFilter">
+                <option value="all">Tous niveaux</option>
+                <option value="1">Niveau 1 - Connaissances fondamentales</option>
+                <option value="2">Niveau 2 - Analyse simple</option>
+                <option value="3">Niveau 3 - Analyse approfondie</option>
+                <option value="4">Niveau 4 - Questions pièges</option>
+            </select>
+        </div>
+        
+        <div>
+            <label for="searchInput">Recherche:</label>
+            <input type="text" id="searchInput" placeholder="Mot-clé...">
+        </div>
+    </div>
+    
+    <div class="buttons-row">
+        <button id="randomButton">Question aléatoire</button>
+        <button id="importButton" class="btn-import">Importer CSV</button>
+        <button id="resetButton" class="btn-reset">Réinitialiser filtres</button>
+    </div>
+    
+    <div id="questionsCount"></div>
+    
+    <div id="questionList"></div>
+    
+    <footer>
+        <p>© Fabrice Ribet 2025 - Tous droits réservés - Reproduction interdite</p>
+    </footer>
+    
+    <script>
+        // Variables pour stocker les questions
+        let questions = [];
+        
+        // Éléments DOM
+        const categoryFilter = document.getElementById('categoryFilter');
+        const subcategoryFilter = document.getElementById('subcategoryFilter');
+        const difficultyFilter = document.getElementById('difficultyFilter');
+        const searchInput = document.getElementById('searchInput');
+        const randomButton = document.getElementById('randomButton');
+        const importButton = document.getElementById('importButton');
+        const resetButton = document.getElementById('resetButton');
+        const questionsCount = document.getElementById('questionsCount');
+        const questionList = document.getElementById('questionList');
+        
+        // Mapping des sous-catégories
+        const subCategoryNames = {
+            "1.1": "Questions de type carte blanche",
+            "1.2": "Questions d'opinions citoyennes",
+            "1.3": "Questions sur le caractère et la personnalité",
+            "1.4": "Questions de type entretien de recrutement",
+            "2.1": "Conception du management",
+            "2.2": "Relation aux équipes",
+            "2.3": "Défis managériaux contemporains",
+            "2.4": "Relation aux élus",
+            "2.5": "Situations managériales difficiles",
+            "3.1": "Organisation institutionnelle et compétences",
+            "3.2": "Finances locales",
+            "3.3": "Politiques sectorielles",
+            "3.4": "Actualité territoriale",
+            "3.5": "Europe et collectivités",
+            "4.1": "Relations élus/administration",
+            "4.2": "Gestion de crise",
+            "4.3": "Management d'équipe",
+            "4.4": "Déontologie/éthique professionnelle",
+            "4.5": "Relation aux usagers",
+            "5.1": "Questions d'opinion sensibles",
+            "5.2": "Questions techniques pointues",
+            "5.3": "Questions ambiguës",
+            "5.4": "Questions pièges",
+            "5.5": "Questions insistantes"
+        };
+        
+        // Descriptions des niveaux de difficulté
+        const difficultyDescriptions = {
+            1: "Connaissances fondamentales",
+            2: "Analyse simple",
+            3: "Analyse approfondie",
+            4: "Questions pièges/embarrassantes"
+        };
+        
+        // Fonction pour peupler les sous-catégories
+        function populateSubcategories(category) {
+            subcategoryFilter.innerHTML = '<option value="all">Toutes les sous-catégories</option>';
+            
+            if (category === 'all') {
+                Object.entries(subCategoryNames).forEach(([code, name]) => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = name;
+                    subcategoryFilter.appendChild(option);
+                });
+            } else {
+                Object.entries(subCategoryNames).forEach(([code, name]) => {
+                    if (code.startsWith(category + '.')) {
+                        const option = document.createElement('option');
+                        option.value = code;
+                        option.textContent = name;
+                        subcategoryFilter.appendChild(option);
+                    }
+                });
+            }
+        }
+        
+        // Fonction pour filtrer les questions
+        function filterQuestions() {
+            let categoryValue = categoryFilter.value;
+            let subcategoryValue = subcategoryFilter.value;
+            let difficultyValue = difficultyFilter.value;
+            let searchValue = searchInput.value.toLowerCase();
+            
+            let filteredQuestions = questions.filter(question => {
+                let categoryMatch = categoryValue === 'all' || question.category.toString() === categoryValue;
+                let subcategoryMatch = subcategoryValue === 'all' || 
+                                      `${question.category}.${question.subCategory}` === subcategoryValue;
+                let difficultyMatch = difficultyValue === 'all' || question.difficulty.toString() === difficultyValue;
+                let searchMatch = searchValue === '' || 
+                                question.question.toLowerCase().includes(searchValue) ||
+                                question.keywords.some(k => k.toLowerCase().includes(searchValue));
+                
+                return categoryMatch && subcategoryMatch && difficultyMatch && searchMatch;
+            });
+            
+            displayQuestions(filteredQuestions);
+            questionsCount.textContent = `Questions affichées : ${filteredQuestions.length} sur ${questions.length}`;
+        }
+
+// Fonction pour obtenir l'icône selon le type de réponse
+function getResponseIcon(responseType) {
+    switch(responseType) {
+        case 'rafale':
+            return '<i class="fas fa-bolt response-icon"></i>';
+        case 'enjeux':
+            return '<i class="fas fa-feather-alt response-icon"></i>';
+        case 'poisson':
+            return '<i class="fas fa-fish response-icon"></i>';
+        case 'reflexive':
+            return '<i class="fas fa-brain response-icon"></i>';
+        case 'theatre':
+            return '<i class="fas fa-theater-masks response-icon"></i>';
+        default:
+            return '<i class="fas fa-comment response-icon"></i>';
+    }
+}
+        
+        // Fonction pour afficher les questions
+function displayQuestions(filteredQuestions) {
+    questionList.innerHTML = '';
+    
+    if (filteredQuestions.length === 0) {
+        questionList.innerHTML = '<p>Aucune question ne correspond aux critères sélectionnés.</p>';
+        return;
+    }
+    
+    filteredQuestions.forEach(question => {
+        const container = document.createElement('div');
+        container.className = `question-container difficulty-${question.difficulty}`;
+        
+        const categoryNames = {
+            1: "Personnalité",
+            2: "Management",
+            3: "Culture territoriale",
+            4: "Mise en situation",
+            5: "Question embarrassante"
+        };
+        
+        const categoryName = categoryNames[question.category] || "Autre";
+        const subCategoryCode = `${question.category}.${question.subCategory}`;
+        const subCategoryName = subCategoryNames[subCategoryCode] || "Autre";
+        const difficultyDescription = difficultyDescriptions[question.difficulty] || "";
+        
+        const keywordsHTML = question.keywords.map(keyword => 
+            `<span class="keyword">${keyword}</span>`
+        ).join('');
+        
+// Déterminer le type de réponse basé sur la méthode de réponse
+let responseType = "";
+let labels = ["", "", "", "", ""];
+let responseTitle = "";
+
+if (question.responseMethod) {
+    const methodLower = question.responseMethod.toLowerCase();
+    
+    if (methodLower.includes("rafale")) {
+        responseType = "rafale";
+        responseTitle = "Réponse rapide et concise";
+        labels = ["Définition/point clé", "Contextualisation", "Nuance/perspective", "", ""];
+    } 
+    else if (methodLower.includes("enjeux") || methodLower.includes("albatros")) {
+        responseType = "enjeux";
+        responseTitle = "Réponse par les enjeux (Albatros)";
+        labels = ["Enjeu 1 + point de vue", "Enjeu 2 + point de vue", "Enjeu 3 + point de vue", "", ""];
+    } 
+    else if (methodLower.includes("poisson") || methodLower.includes("japonais")) {
+        responseType = "poisson";
+        responseTitle = "Poisson japonais";
+        labels = ["Contextualisation (tête)", "Première ligne d'analyse (nageoire dorsale)", "Seconde ligne d'analyse (nageoire latérale)", "Réponse précise (collet)", "Ouverture (queue)"];
+    }
+    else if (methodLower.includes("réflexive") || methodLower.includes("exemple structuré")) {
+        responseType = "reflexive";
+        responseTitle = "Analyse réflexive";
+        labels = ["Analyse de la situation", "Compétence démontrée", "Exemple concret", "Difficultés rencontrées", "Enseignements tirés"];
+    }
+    else if (methodLower.includes("pièce de théâtre") || methodLower.includes("3 actes")) {
+        responseType = "theatre";
+        responseTitle = "Pièce de théâtre en 3 actes";
+        labels = ["Acte I: Urgence", "Acte I: Mesures immédiates", "Acte II: Premières mesures", "Acte II: Communications", "Acte III: Solutions à moyen terme"];
+    }
+}
+
+// Icône correspondant au type de réponse
+const responseIcon = getResponseIcon(responseType);
+
+// Construire le HTML pour la réponse automatique avec des sauts de ligne
+let autoResponseHTML = "";
+const hasPhrases = question.phrase1 || question.phrase2 || question.phrase3 || question.phrase4 || question.phrase5;
+
+if (hasPhrases) {
+    autoResponseHTML = `<div class="auto-response ${responseType}" style="display: none;">
+    <hr>
+    ${responseIcon}
+    <h4>${responseTitle} (${question.responseMethod})</h4>`;
+    
+    // Ajouter chaque phrase avec son label si elle existe
+    if (question.phrase1) autoResponseHTML += `<p><strong>${labels[0]}:</strong> ${question.phrase1}</p>`;
+    if (question.phrase2) autoResponseHTML += `<p><strong>${labels[1]}:</strong> ${question.phrase2}</p>`;
+    if (question.phrase3) autoResponseHTML += `<p><strong>${labels[2]}:</strong> ${question.phrase3}</p>`;
+    if (question.phrase4 && labels[3]) autoResponseHTML += `<p><strong>${labels[3]}:</strong> ${question.phrase4}</p>`;
+    if (question.phrase5 && labels[4]) autoResponseHTML += `<p><strong>${labels[4]}:</strong> ${question.phrase5}</p>`;
+    
+    autoResponseHTML += '</div>';
+}
+        
+        container.innerHTML = `
+            <div class="question">${question.id}: ${question.question}</div>
+            <div class="metadata">
+                Catégorie: ${categoryName}/${subCategoryName} | 
+                Type: ${question.type} | 
+                Difficulté: Niveau ${question.difficulty} - ${difficultyDescription}
+                ${question.responseMethod ? ` | Méthode: ${question.responseMethod}` : ''}
+            </div>
+            <div class="attention-points">Points d'attention: ${question.attention}</div>
+            <div class="keywords">${keywordsHTML}</div>
+            ${autoResponseHTML}
+        `;
+        
+        questionList.appendChild(container);
+    });
+}
+        
+        // Fonction pour afficher une question aléatoire
+        function showRandomQuestion() {
+            let categoryValue = categoryFilter.value;
+            let subcategoryValue = subcategoryFilter.value;
+            let difficultyValue = difficultyFilter.value;
+            let searchValue = searchInput.value.toLowerCase();
+            
+            let filteredQuestions = questions.filter(question => {
+                let categoryMatch = categoryValue === 'all' || question.category.toString() === categoryValue;
+                let subcategoryMatch = subcategoryValue === 'all' || 
+                                     `${question.category}.${question.subCategory}` === subcategoryValue;
+                let difficultyMatch = difficultyValue === 'all' || question.difficulty.toString() === difficultyValue;
+                let searchMatch = searchValue === '' || 
+                               question.question.toLowerCase().includes(searchValue) ||
+                               question.keywords.some(k => k.toLowerCase().includes(searchValue));
+                
+                return categoryMatch && subcategoryMatch && difficultyMatch && searchMatch;
+            });
+            
+            if (filteredQuestions.length > 0) {
+                const randomIndex = Math.floor(Math.random() * filteredQuestions.length);
+                displayQuestions([filteredQuestions[randomIndex]]);
+                questionsCount.textContent = `Question aléatoire (1 sur ${filteredQuestions.length})`;
+            } else {
+                questionList.innerHTML = '<p>Aucune question ne correspond aux critères pour sélection aléatoire.</p>';
+                questionsCount.textContent = 'Aucune question disponible';
+            }
+        }
+        
+        // Fonction pour réinitialiser les filtres
+        function resetFilters() {
+            categoryFilter.value = 'all';
+            populateSubcategories('all');
+            difficultyFilter.value = 'all';
+            searchInput.value = '';
+            filterQuestions();
+        }
+        
+        // Fonction pour importer un fichier CSV
+        function importCSV() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.csv';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        processCSV(event.target.result);
+                    };
+                    reader.readAsText(file);
+                }
+                document.body.removeChild(fileInput);
+            });
+            
+            fileInput.click();
+        }
+        
+        // Fonction pour traiter le CSV
+        function processCSV(csvContent) {
+            Papa.parse(csvContent, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        const processedQuestions = processCSVData(results.data);
+                        if (processedQuestions && processedQuestions.length > 0) {
+                            questions = processedQuestions;
+                            try {
+                                localStorage.setItem('examQuestions', JSON.stringify(questions));
+                            } catch (e) {
+                                console.warn("Impossible de sauvegarder dans localStorage:", e);
+                            }
+                            
+                            populateSubcategories('all');
+                            filterQuestions();
+                            alert(`${questions.length} questions importées avec succès !`);
+                        } else {
+                            alert("Aucune question valide n'a pu être extraite du fichier.");
+                        }
+                    } else {
+                        alert("Le fichier CSV semble vide ou mal formaté.");
+                    }
+                },
+                error: function(error) {
+                    console.error("Erreur d'analyse CSV:", error);
+                    alert("Erreur lors de l'analyse du fichier CSV.");
+                }
+            });
+        }
+        
+        // Fonction de traitement des données CSV
+        function processCSVData(csvData) {
+            // Fonction pour mapper les catégories
+            function mapCategory(mainCat, subCat) {
+                const mainCategory = (mainCat || "").toLowerCase();
+                const subCategory = (subCat || "").toLowerCase();
+                
+                if (mainCategory.includes("personnalité") || 
+                    subCategory.includes("valeur") ||
+                    subCategory.includes("aspiration") ||
+                    subCategory.includes("caractère") ||
+                    subCategory.includes("opinion") ||
+                    subCategory.includes("personnalité")) {
+                    return 1;
+                }
+                
+                if (mainCategory.includes("management") || 
+                    subCategory.includes("managérial") ||
+                    subCategory.includes("leadership") ||
+                    subCategory.includes("équipe") ||
+                    mainCategory.includes("ressources humaines") ||
+                    subCategory.includes("management")) {
+                    return 2;
+                }
+                
+                if (mainCategory.includes("culture territoriale") || 
+                    mainCategory.includes("juridique") ||
+                    mainCategory.includes("institution") ||
+                    mainCategory.includes("financière") ||
+                    subCategory.includes("territorial") ||
+                    subCategory.includes("gouvernance")) {
+                    return 3;
+                }
+                
+                if (mainCategory.includes("mise en situation") || 
+                    subCategory.includes("crise") ||
+                    (subCategory.includes("relation") && subCategory.includes("élu"))) {
+                    return 4;
+                }
+                
+                return 5;
+            }
+            
+            // Fonction pour mapper les sous-catégories
+            function mapSubCategory(categoryId, mainCat, subCat) {
+                const mainCategory = (mainCat || "").toLowerCase();
+                const subCategory = (subCat || "").toLowerCase();
+                
+                if (categoryId === 1) {
+                    if (subCategory.includes("carte blanche") || 
+                        subCategory.includes("aspiration") ||
+                        subCategory.includes("idéal")) {
+                        return 1;
+                    }
+                    if (subCategory.includes("citoyen") || 
+                        subCategory.includes("opinion") ||
+                        subCategory.includes("société")) {
+                        return 2;
+                    }
+                    if (subCategory.includes("caractère") || 
+                        subCategory.includes("personnalité") ||
+                        subCategory.includes("analyse de soi")) {
+                        return 3;
+                    }
+                    return 4;
+                }
+                
+                if (categoryId === 2) {
+                    if (subCategory.includes("concept") || 
+                        subCategory.includes("vision") ||
+                        subCategory.includes("théorie")) {
+                        return 1;
+                    }
+                    if (subCategory.includes("équipe") || 
+                        subCategory.includes("relation") ||
+                        subCategory.includes("collaboration")) {
+                        return 2;
+                    }
+                    if (subCategory.includes("contemporain") || 
+                        subCategory.includes("défi") ||
+                        subCategory.includes("numérique") ||
+                        subCategory.includes("diversité")) {
+                        return 3;
+                    }
+                    if (subCategory.includes("élu") || 
+                        subCategory.includes("politique")) {
+                        return 4;
+                    }
+                    return 5;
+                }
+                
+                if (categoryId === 3) {
+                    if (subCategory.includes("institution") || 
+                        subCategory.includes("organisation") ||
+                        subCategory.includes("compétence")) {
+                        return 1;
+                    }
+                    if (subCategory.includes("finance") || 
+                        subCategory.includes("budget") ||
+                        subCategory.includes("fiscal")) {
+                        return 2;
+                    }
+                    if (subCategory.includes("sectoriel") || 
+                        subCategory.includes("social") ||
+                        subCategory.includes("éducation") ||
+                        subCategory.includes("environnement")) {
+                        return 3;
+                    }
+                    if (subCategory.includes("actualité")) {
+                        return 4;
+                    }
+                    return 5;
+                }
+                
+                if (categoryId === 4) {
+                    if (subCategory.includes("élu") || 
+                        subCategory.includes("politique")) {
+                        return 1;
+                    }
+                    if (subCategory.includes("crise")) {
+                        return 2;
+                    }
+                    if (subCategory.includes("équipe") || 
+                        subCategory.includes("management d'équipe")) {
+                        return 3;
+                    }
+                    if (subCategory.includes("éthique") || 
+                        subCategory.includes("déontologie")) {
+                        return 4;
+                    }
+                    return 5;
+                }
+                
+                if (categoryId === 5) {
+                    if (subCategory.includes("sensible") || 
+                        subCategory.includes("controvers")) {
+                        return 1;
+                    }
+                    if (subCategory.includes("technique") || 
+                        subCategory.includes("pointu") ||
+                        subCategory.includes("juridique")) {
+                        return 2;
+                    }
+                    if (subCategory.includes("ambigu")) {
+                        return 3;
+                    }
+                    if (subCategory.includes("piège")) {
+                        return 4;
+                    }
+                    return 5;
+                }
+                
+                return 1;
+            }
+            
+            // Normaliser le niveau de difficulté - conserve désormais le niveau 4
+            function normalizeDifficulty(level) {
+                if (level === null || level === undefined) return 2;
+                
+                if (typeof level === 'string') {
+                    if (level.includes("Niveau")) {
+                        const num = parseInt(level.replace("Niveau ", ""));
+                        return Math.min(Math.max(1, num), 4);
+                    }
+                }
+                
+                if (typeof level === 'number') {
+                    return Math.min(Math.max(1, level), 4);
+                }
+                
+                return 2;
+            }
+            
+            // Transformer les données
+            const structuredQuestions = csvData.map((item, index) => {
+                if (!item.Question) return null;
+                
+                const mainCategory = mapCategory(item["Catégorie principale"], item["Sous-catégorie"]);
+                const subCategory = mapSubCategory(mainCategory, item["Catégorie principale"], item["Sous-catégorie"]);
+                const difficulty = normalizeDifficulty(item["Niveau de difficulté"]);
+                
+                // Type de question
+                let type = "Opinion";
+                if (item.Question.toLowerCase().includes("que faites-vous") || 
+                    item.Question.toLowerCase().includes("comment gérez-vous") ||
+                    mainCategory === 4) {
+                    type = "Mise en situation";
+                } else if (item.Question.toLowerCase().includes("qu'est-ce que") || 
+                          item.Question.toLowerCase().includes("définissez")) {
+                    type = "Factuelle";
+                }
+                
+                // Mots-clés
+                const keywords = item["Mots-clés"] ? 
+                                item["Mots-clés"].split(",").map(k => k.trim()) : 
+                                [];
+                
+                return {
+    id: `Q${index+1}`,
+    question: item.Question,
+    category: mainCategory,
+    subCategory: subCategory,
+    difficulty: difficulty,
+    type: type,
+    keywords: keywords,
+    attention: item["Points d'attention (éléments clefs à considérer)"] || 
+              "Préparez une réponse structurée qui démontre votre compréhension des enjeux.",
+    responseMethod: item["Méthode de réponse recommandée"] || "",
+    // Ajout des phrases pour la réponse automatique
+    phrase1: item["phrase 1"] || "",
+    phrase2: item["phrase 2"] || "",
+    phrase3: item["phrase 3"] || "",
+    phrase4: item["phrase 4"] || "",
+    phrase5: item["phrase 5"] || ""
+};
+            }).filter(q => q !== null);
+            
+            return structuredQuestions;
+        }
+        
+        // Charger des exemples de questions
+        function loadSampleQuestions() {
+            questions = [
+                {
+                    id: "Q1",
+                    question: "Comment définiriez-vous le rôle du manager territorial ?",
+                    category: 2,
+                    subCategory: 1,
+                    difficulty: 2,
+                    type: "Opinion",
+                    keywords: ["management", "service public", "leadership"],
+                    attention: "Montre votre vision du management public. Intégrer la dimension politique et la spécificité du service public.",
+                    responseMethod: "Par les enjeux"
+                },
+                {
+                    id: "Q2",
+                    question: "La différenciation territoriale est-elle compatible avec l'égalité républicaine ?",
+                    category: 3,
+                    subCategory: 1,
+                    difficulty: 3,
+                    type: "Opinion",
+                    keywords: ["différenciation", "égalité", "constitution", "adaptation"],
+                    attention: "Question au cœur des débats actuels sur l'organisation territoriale. Montrer sa connaissance de la loi 3DS.",
+                    responseMethod: "Poisson japonais"
+                },
+                {
+                    id: "Q3",
+                    question: "Vous êtes DGS de la mairie de A (50 000 h). Des ATSEM souhaitent faire valoir leur droit de retrait, car les travaux réalisés durant l'été dans les écoles de la commune ne sont pas terminés. Que faites-vous ?",
+                    category: 4,
+                    subCategory: 3,
+                    difficulty: 2,
+                    type: "Mise en situation",
+                    keywords: ["droit de retrait", "continuité", "sécurité", "dialogue"],
+                    attention: "Situation testant votre connaissance du droit de retrait et votre capacité à concilier sécurité et continuité du service public.",
+                    responseMethod: "Pièce de théâtre en 3 actes"
+                },
+                {
+                    id: "Q4",
+                    question: "Pourriez-vous travailler dans une collectivité territoriale dirigée par le Rassemblement National ?",
+                    category: 5,
+                    subCategory: 1,
+                    difficulty: 4,
+                    type: "Opinion",
+                    keywords: ["neutralité", "déontologie", "loyauté", "service public"],
+                    attention: "Question très sensible testant votre conception de la neutralité du service public et votre capacité à articuler valeurs personnelles et devoir professionnel.",
+                    responseMethod: "Poisson japonais"
+                }
+            ];
+            
+            filterQuestions();
+        }
+        
+        // Initialisation
+        function init() {
+            // Essayer de charger des questions du localStorage
+            const savedQuestions = localStorage.getItem('examQuestions');
+            if (savedQuestions) {
+                try {
+                    questions = JSON.parse(savedQuestions);
+                    populateSubcategories('all');
+                    filterQuestions();
+                } catch (e) {
+                    console.error("Erreur lors du chargement des questions:", e);
+                    loadSampleQuestions();
+                }
+            } else {
+                loadSampleQuestions();
+            }
+            
+            // Événements
+            categoryFilter.addEventListener('change', function() {
+                populateSubcategories(this.value);
+                filterQuestions();
+            });
+            
+            subcategoryFilter.addEventListener('change', filterQuestions);
+            difficultyFilter.addEventListener('change', filterQuestions);
+            searchInput.addEventListener('input', filterQuestions);
+            randomButton.addEventListener('click', showRandomQuestion);
+            importButton.addEventListener('click', importCSV);
+            resetButton.addEventListener('click', resetFilters);
+        }
+
+// Écouteur d'événement pour la case à cocher des réponses automatiques
+const showAutoResponsesCheckbox = document.getElementById('showAutoResponses');
+showAutoResponsesCheckbox.addEventListener('change', function() {
+    const autoResponses = document.querySelectorAll('.auto-response');
+    autoResponses.forEach(response => {
+        response.style.display = this.checked ? 'block' : 'none';
+    });
+});
+        
+        // Démarrer l'application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script>
+// Vérification d'accès séparée
+(function() {
+    const userCode = prompt("🔐 Code d'accès Admin'Quest Premium:");
+    if (userCode !== "TEST123") {
+        document.body.innerHTML = '<div style="text-align:center; padding:50px; font-family:Arial; font-size:20px;">❌ Code invalide<br><br>Contact : votre@email.com</div>';
+        throw new Error("Arrêt");
+    }
+})();
+</script>
+</body>
+</html>
